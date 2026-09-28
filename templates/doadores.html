@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Registros | Meu Projeto{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div><h1 class="mb-1">Doadores</h1><p class="text-body-secondary mb-0">Lista de doadores cadastrados.</p></div>
+  <a class="btn btn-primary" href="{{ url_for('novo_doador') }}">Cadastrar Doador</a>
+</div>
+{% if records %}
+<div class="table-responsive card shadow-sm"><table class="table table-hover mb-0"><thead><tr><th>Nome</th><th>Email</th><th>Tipo Sanguíneo</th><th>Criado em</th><th class="text-end">Ações</th></tr></thead><tbody>
+{% for record in records %}
+<tr>
+  <td class="fw-semibold">{{ record['name'] }}</td>
+  <td>{{ record['email'] }}</td>
+  <td>{{ record['blood_type'] }}</td>
+  <td>{{ record['created_at'] }}</td>
+  <td class="text-end">
+    <a class="btn btn-sm btn-outline-primary" href="{{ url_for('editar_doador', record_id=record['id']) }}">Editar</a>
+    <form class="d-inline" method="post" action="{{ url_for('excluir_doador', record_id=record['id']) }}">
+      <button class="btn btn-sm btn-outline-danger" type="submit" onclick="return confirm('Excluir este doador?')">Excluir</button>
+    </form>
+  </td>
+</tr>
+{% endfor %}
+</tbody></table></div>
+{% else %}<div class="alert alert-info">Nenhum doador cadastrado. Crie o primeiro para testar o exemplo.</div>{% endif %}
+{% endblock %}

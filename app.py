@@ -92,6 +92,40 @@ def listar_registros():
     connection.close()
     return render_template("registros.html", records=records)
 
+@app.route("/sistema/doadores")
+def listar_doadores():
+    connection = get_db_connection()
+    records = connection.execute(
+        "SELECT * FROM doadores ORDER BY created_at DESC"
+    ).fetchall()
+    connection.close()
+    return render_template("doadores.html", records=records)
+
+
+
+@app.route("/sistema/doadores/novo", methods=["GET", "POST"])
+def novo_doador():
+    if request.method == "POST":
+        name = request.form["name"].strip()
+        email = request.form["email"].strip().lower()
+        blood_type = request.form["blood_type"].strip()
+
+        if not name:
+            flash("Informe o nome do doador.", "danger")
+            return render_template("doador_form.html", record=None)
+
+        connection = get_db_connection()
+        connection.execute(
+            "INSERT INTO doadores (name, email, blood_type) VALUES (?, ?, ?)",
+            (name, email, blood_type),
+        )
+        connection.commit()
+        connection.close()
+        flash("Doador cadastrado com sucesso.", "success")
+        return redirect(url_for("listar_doadores"))
+
+    return render_template("doador_form.html", record=None)
+
 
 @app.route("/sistema/registros/novo", methods=["GET", "POST"])
 def novo_registro():
@@ -150,6 +184,41 @@ def editar_registro(record_id):
     return render_template("registro_form.html", record=record)
 
 
+@app.route("/sistema/doadores/<int:record_id>/editar", methods=["GET", "POST"])
+def editar_doador(record_id):
+    connection = get_db_connection()
+    record = connection.execute(
+        "SELECT * FROM doadores WHERE id = ?", (record_id,)
+    ).fetchone()
+
+    if record is None:
+        connection.close()
+        flash("Registro não encontrado.", "danger")
+        return redirect(url_for("listar_doadores"))
+
+    if request.method == "POST":
+        name = request.form["name"].strip()
+        email = request.form["email"].strip()
+        blood_type = request.form["blood_type"].strip()
+        if not name:
+            connection.close()
+            flash("Informe um nome para o doador.", "danger")
+            return render_template("doador_form.html", record=record)
+
+        # UPDATE altera dados que já existem no banco.
+        connection.execute(
+            "UPDATE doadores SET name = ?, email = ?, blood_type = ? WHERE id = ?",
+            (name, email, blood_type, record_id),
+        )
+        connection.commit()
+        connection.close()
+        flash("Registro atualizado com sucesso.", "success")
+        return redirect(url_for("listar_doadores"))
+
+    connection.close()
+    return render_template("doador_form.html", record=record)
+
+
 @app.route("/sistema/registros/<int:record_id>/excluir", methods=["POST"])
 def excluir_registro(record_id):
     connection = get_db_connection()
@@ -159,6 +228,16 @@ def excluir_registro(record_id):
     connection.close()
     flash("Registro excluído.", "success")
     return redirect(url_for("listar_registros"))
+
+
+@app.route("/sistema/doadores/<int:record_id>/excluir", methods=["POST"])
+def excluir_doador(record_id):
+    connection = get_db_connection()
+    connection.execute("DELETE FROM doadores WHERE id = ?", (record_id,))
+    connection.commit()
+    connection.close()
+    flash("Doador excluído.", "success")
+    return redirect(url_for("listar_doadores"))
 
 
 if __name__ == "__main__":

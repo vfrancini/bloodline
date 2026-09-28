@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if record else 'Novo' }} registro | Meu Projeto{% endblock %}
+{% block content %}
+<div class="form-card card shadow-sm mx-auto"><div class="card-body p-4">
+  <h1 class="h3 mb-3">{{ 'Editar' if record else 'Novo' }} registro</h1>
+  <p class="text-body-secondary">Este é apenas um exemplo. Adapte os campos à sua entidade principal.</p>
+  <form method="post">
+    <div class="mb-3"><label class="form-label" for="name">Nome</label><input class="form-control" id="name" name="name" value="{{ record['name'] if record else '' }}" required></div>
+    <div class="mb-3"><label class="form-label" for="email">Email</label><input class="form-control" id="email" name="email" type="email" value="{{ record['email'] if record else '' }}" required></div>
+    <div class="mb-3"><label class="form-label" for="blood_type">Tipo Sanguíneo</label><input class="form-control" id="blood_type" name="blood_type" value="{{ record['blood_type'] if record else '' }}" required></div>
+    <button class="btn btn-primary" type="submit">Salvar</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('listar_doadores') }}">Cancelar</a>
+  </form>
+</div></div>
+{% endblock %}
