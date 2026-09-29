@@ -115,6 +115,14 @@ def novo_doador():
             return render_template("doador_form.html", record=None)
 
         connection = get_db_connection()
+        existing_donor = connection.execute(
+            "SELECT id FROM doadores WHERE email = ?", (email,)
+        ).fetchone()
+        if existing_donor:
+            connection.close()
+            flash("Já existe um doador cadastrado com este e-mail.", "danger")
+            return render_template("doador_form.html", record=None)
+
         connection.execute(
             "INSERT INTO doadores (name, email, blood_type) VALUES (?, ?, ?)",
             (name, email, blood_type),
@@ -198,11 +206,20 @@ def editar_doador(record_id):
 
     if request.method == "POST":
         name = request.form["name"].strip()
-        email = request.form["email"].strip()
+        email = request.form["email"].strip().lower()
         blood_type = request.form["blood_type"].strip()
         if not name:
             connection.close()
             flash("Informe um nome para o doador.", "danger")
+            return render_template("doador_form.html", record=record)
+
+        existing_donor = connection.execute(
+            "SELECT id FROM doadores WHERE email = ? AND id != ?",
+            (email, record_id),
+        ).fetchone()
+        if existing_donor:
+            connection.close()
+            flash("Já existe um doador cadastrado com este e-mail.", "danger")
             return render_template("doador_form.html", record=record)
 
         # UPDATE altera dados que já existem no banco.
